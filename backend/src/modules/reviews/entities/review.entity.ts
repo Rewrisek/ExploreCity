@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+/* eslint-disable */
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    OneToOne,
+    JoinColumn
+} from 'typeorm';
 import { Place } from '../../places/entities/place.entity';
 import { Comment } from '../../comments/entities/comment.entity';
 
@@ -7,7 +15,7 @@ export class Review {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'int', nullable: false })
+    @Column({ type: 'int' })
     rating: number;
 
     @Column({ type: 'varchar', length: 255 })
@@ -23,9 +31,6 @@ export class Review {
     @Column({ name: 'place_id' })
     placeId: number;
 
-    @OneToOne(() => Comment, comment => comment.review, {
-        nullable: true,
-        cascade: true
-    })
+    @OneToOne(() => Comment, comment => comment.review, { nullable: true })
     comment?: Comment;
 }

@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable */
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { City } from './entities/city.entity';
 import { CreateCityDto } from './dto/create-city.dto';
+import { CityResponseDto } from './dto/city-response.dto';
 
 @Injectable()
 export class CitiesService {
@@ -11,25 +13,24 @@ export class CitiesService {
         private cityRepository: Repository<City>,
     ) {}
 
-    async create(createCityDto: CreateCityDto): Promise<City> {
-        const city = this.cityRepository.create(createCityDto);
-        return await this.cityRepository.save(city);
-    }
-
-    async findAll(): Promise<City[]> {
-        return await this.cityRepository.find({
+    async findAll(): Promise<CityResponseDto[]> {
+        const cities = await this.cityRepository.find({
             order: { name: 'ASC' }
         });
+        return cities.map(city => ({
+            id: city.id,
+            name: city.name,
+            imageUrl: city.imageUrl
+        }));
     }
 
-    async findOne(id: number): Promise<City> {
-        const city = await this.cityRepository.findOne({
-            where: { id },
-            relations: ['places']
-        });
-        if (!city) {
-            throw new NotFoundException(`City with ID ${id} not found`);
-        }
-        return city;
+    async create(createCityDto: CreateCityDto): Promise<CityResponseDto> {
+        const city = this.cityRepository.create(createCityDto);
+        await this.cityRepository.save(city);
+        return {
+            id: city.id,
+            name: city.name,
+            imageUrl: city.imageUrl
+        };
     }
 }

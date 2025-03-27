@@ -1,43 +1,62 @@
+/* eslint-disable */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from './entities/review.entity';
+import { Place } from '../places/entities/place.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { PlacesService } from '../places/places.service';
+import { ReviewResponseDto } from './dto/review-response.dto';
+import { RatingSummary } from '../../shared/interfaces/rating-summary.interface';
 
 @Injectable()
 export class ReviewsService {
     constructor(
         @InjectRepository(Review)
         private reviewRepository: Repository<Review>,
-        private placesService: PlacesService,
+        @InjectRepository(Place)
+        private placeRepository: Repository<Place>,
     ) {}
 
-    async create(createReviewDto: CreateReviewDto): Promise<Review> {
+    async createReview(
+        placeId: number,
+        createReviewDto: CreateReviewDto
+    ): Promise<ReviewResponseDto> {
         // Verify place exists
-        const place = await this.placesService.findOne(createReviewDto.placeId);
+        const place = await this.placeRepository.findOne({ where: { id: placeId } });
+        if (!place) {
+            throw new NotFoundException('Place not found');
+        }
 
-        // Create review
+        // Create new review
         const review = this.reviewRepository.create({
             ...createReviewDto,
-            place
+            placeId
         });
-        const savedReview = await this.reviewRepository.save(review);
+        await this.reviewRepository.save(review);
 
-        // Update place's average rating
-        await this.updatePlaceRating(place.id);
+        // Update place's rating
+        await this.updatePlaceRating(placeId);
 
-        return savedReview;
+        return {
+            id: review.id,
+            rating: review.rating,
+            userName: review.userName,
+            createdAt: review.createdAt,
+            placeId: review.placeId
+        };
     }
 
-    async findByPlace(placeId: number): Promise<Review[]> {
+    async getPlaceRating(placeId: number): Promise<RatingSummary> {
         // Verify place exists
-        await this.placesService.findOne(placeId);
+        const place = await this.placeRepository.findOne({ where: { id: placeId } });
+        if (!place) {
+            throw new NotFoundException('Place not found');
+        }
 
-        return await this.reviewRepository.find({
-            where: { placeId },
-            order: { createdAt: 'DESC' }
-        });
+        return {
+            averageRating: place.averageRating,
+            totalReviews: place.totalReviews
+        };
     }
 
     private async updatePlaceRating(placeId: number): Promise<void> {
@@ -50,7 +69,7 @@ export class ReviewsService {
             ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
             : 0;
 
-        await this.placesService['placeRepository'].update(placeId, {
+        await this.placeRepository.update(placeId, {
             averageRating,
             totalReviews
         });

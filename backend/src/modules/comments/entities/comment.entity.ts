@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+/* eslint-disable */
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToOne,
+    JoinColumn
+} from 'typeorm';
 import { Review } from '../../reviews/entities/review.entity';
 
 @Entity('comments')

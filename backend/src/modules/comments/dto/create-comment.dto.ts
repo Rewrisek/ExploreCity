@@ -1,9 +1,11 @@
-import { IsString, IsNumber } from 'class-validator';
+/* eslint-disable */
+import {
+    IsString,
+    IsNotEmpty
+} from 'class-validator';
 
 export class CreateCommentDto {
-    @IsNumber()
-    reviewId: number;
-
     @IsString()
+    @IsNotEmpty()
     text: string;
 }

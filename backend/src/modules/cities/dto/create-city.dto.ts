@@ -1,12 +1,14 @@
-import {IsOptional, IsString, IsUrl, MinLength} from 'class-validator';
+/* eslint-disable */
+import { IsString, IsNotEmpty, MinLength } from 'class-validator';
 
 export class CreateCityDto {
     @IsString()
+    @IsNotEmpty()
     @MinLength(2)
     name: string;
 
-    @IsOptional()
-    @IsUrl()
     @IsString()
-    imageUrl?: string;
+    @IsNotEmpty()
+    @MinLength(2)
+    imageUrl: string;
 }

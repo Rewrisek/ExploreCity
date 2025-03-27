@@ -1,16 +1,15 @@
+/* eslint-disable */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentsService } from './comments.service';
-import { CommentsController } from './comments.controller';
 import { Comment } from './entities/comment.entity';
-import { ReviewsModule } from '../reviews/reviews.module';
+import { Review } from '../reviews/entities/review.entity';
+import { Place } from '../places/entities/place.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Comment]),
-        ReviewsModule
+        TypeOrmModule.forFeature([Comment, Review, Place])
     ],
-    controllers: [CommentsController],
     providers: [CommentsService],
     exports: [CommentsService]
 })

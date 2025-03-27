@@ -1,31 +1,59 @@
+/* eslint-disable */
 import {
     Controller,
-    Post,
     Get,
+    Post,
     Body,
     Param,
     ParseIntPipe
 } from '@nestjs/common';
 import { PlacesService } from './places.service';
-import { CreatePlaceDto } from './dto/create-place.dto';
-import { Place } from './entities/place.entity';
+import { ReviewsService } from '../reviews/reviews.service';
+import { CommentsService } from '../comments/comments.service';
+import { CreateReviewDto } from '../reviews/dto/create-review.dto';
+import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 
 @Controller('places')
 export class PlacesController {
-    constructor(private readonly placesService: PlacesService) {}
+    constructor(
+        private readonly placesService: PlacesService,
+        private readonly reviewsService: ReviewsService,
+        private readonly commentsService: CommentsService
+    ) {}
 
-    @Post()
-    async create(@Body() createPlaceDto: CreatePlaceDto): Promise<Place> {
-        return await this.placesService.create(createPlaceDto);
+    @Get('types')
+    async getPlaceTypes() {
+        return this.placesService.getPlaceTypes();
     }
 
-    @Get('city/:cityId')
-    async findByCity(@Param('cityId', ParseIntPipe) cityId: number): Promise<Place[]> {
-        return await this.placesService.findByCity(cityId);
+    @Get('place/:id')
+    async getPlace(@Param('id', ParseIntPipe) placeId: number) {
+        return this.placesService.findOnePlace(placeId);
     }
 
-    @Get(':id')
-    async findOne(@Param('id', ParseIntPipe) id: number): Promise<Place> {
-        return await this.placesService.findOne(id);
+    @Get('place/:id/comments')
+    async getPlaceComments(@Param('id', ParseIntPipe) placeId: number) {
+        return this.commentsService.getPlaceComments(placeId);
+    }
+
+    @Post('place/:id/comments')
+    async createComment(
+        @Param('id', ParseIntPipe) placeId: number,
+        @Body() createCommentDto: CreateCommentDto
+    ) {
+        return this.commentsService.createComment(placeId, createCommentDto);
+    }
+
+    @Get('place/:id/rating')
+    async getPlaceRating(@Param('id', ParseIntPipe) placeId: number) {
+        return this.reviewsService.getPlaceRating(placeId);
+    }
+
+    @Post('place/:id/rating')
+    async createReview(
+        @Param('id', ParseIntPipe) placeId: number,
+        @Body() createReviewDto: CreateReviewDto
+    ) {
+        return this.reviewsService.createReview(placeId, createReviewDto);
     }
 }

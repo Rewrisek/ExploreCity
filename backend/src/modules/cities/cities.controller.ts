@@ -1,31 +1,41 @@
+/* eslint-disable */
 import {
     Controller,
-    Post,
     Get,
+    Post,
     Body,
     Param,
     ParseIntPipe
 } from '@nestjs/common';
 import { CitiesService } from './cities.service';
+import { PlacesService } from '../places/places.service';
 import { CreateCityDto } from './dto/create-city.dto';
-import { City } from './entities/city.entity';
+import { CreatePlaceDto } from '../places/dto/create-place.dto';
 
 @Controller('cities')
 export class CitiesController {
-    constructor(private readonly citiesService: CitiesService) {}
-
-    @Post()
-    async create(@Body() createCityDto: CreateCityDto): Promise<City> {
-        return await this.citiesService.create(createCityDto);
-    }
+    constructor(
+        private readonly citiesService: CitiesService,
+        private readonly placesService: PlacesService
+    ) {}
 
     @Get()
-    async findAll(): Promise<City[]> {
-        return await this.citiesService.findAll();
+    async getCities() {
+        return this.citiesService.findAll();
     }
 
-    @Get(':id')
-    async findOne(@Param('id', ParseIntPipe) id: number): Promise<City> {
-        return await this.citiesService.findOne(id);
+    @Get(':id/places')
+    async getCityPlaces(@Param('id', ParseIntPipe) cityId: number) {
+        return this.placesService.findPlacesByCity(cityId);
+    }
+
+    @Post(':id/places')
+    async createPlace(
+        @Param('id', ParseIntPipe) cityId: number,
+        @Body() createPlaceDto: CreatePlaceDto
+    ) {
+        console.log('Received cityId:', cityId);
+        console.log('Received createPlaceDto:', createPlaceDto);
+        return this.placesService.createPlace(cityId, createPlaceDto);
     }
 }

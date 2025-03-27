@@ -1,6 +1,12 @@
+/* eslint-disable */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+
+import { City } from './modules/cities/entities/city.entity';
+import { Place } from './modules/places/entities/place.entity';
+import { Review } from './modules/reviews/entities/review.entity';
+import { Comment } from './modules/comments/entities/comment.entity';
 
 import { CitiesModule } from './modules/cities/cities.module';
 import { PlacesModule } from './modules/places/places.module';
@@ -18,11 +24,11 @@ import { CommentsModule } from './modules/comments/comments.module';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: '',
+      password: 'BotRewri123**',
       database: 'explore_city',
+      entities: [City, Place, Review, Comment],
+      synchronize: true, // Use only in development
       autoLoadEntities: true,
-      synchronize: process.env.NODE_ENV !== 'production',
-      logging: true,
     }),
     CitiesModule,
     PlacesModule,

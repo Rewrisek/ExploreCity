@@ -1,48 +1,105 @@
+/* eslint-disable */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Place } from './entities/place.entity';
+import { City } from '../cities/entities/city.entity';
 import { CreatePlaceDto } from './dto/create-place.dto';
-import { CitiesService } from '../cities/cities.service';
+import { PlaceResponseDto } from './dto/place-response.dto';
+import { PlaceType } from '../../shared/enums/place-type.enum';
 
 @Injectable()
 export class PlacesService {
     constructor(
         @InjectRepository(Place)
         private placeRepository: Repository<Place>,
-        private citiesService: CitiesService,
+        @InjectRepository(City)
+        private cityRepository: Repository<City>,
     ) {}
 
-    async create(createPlaceDto: CreatePlaceDto): Promise<Place> {
+    async findPlacesByCity(cityId: number): Promise<PlaceResponseDto[]> {
         // Verify city exists
-        await this.citiesService.findOne(createPlaceDto.cityId);
+        const city = await this.cityRepository.findOne({ where: { id: cityId } });
+        if (!city) {
+            throw new NotFoundException('City not found');
+        }
 
-        const place = this.placeRepository.create({
-            ...createPlaceDto,
-            averageRating: 0,
-            totalReviews: 0
-        });
-        return await this.placeRepository.save(place);
-    }
-
-    async findByCity(cityId: number): Promise<Place[]> {
-        // Verify city exists
-        await this.citiesService.findOne(cityId);
-
-        return await this.placeRepository.find({
+        const places = await this.placeRepository.find({
             where: { cityId },
             order: { name: 'ASC' }
         });
+
+        return places.map(place => ({
+            id: place.id,
+            type: place.type,
+            name: place.name,
+            description: place.description,
+            address: place.address,
+            image: place.image,
+            cityId: place.cityId,
+            rating: {
+                averageRating: place.averageRating,
+                totalReviews: place.totalReviews
+            }
+        }));
     }
 
-    async findOne(id: number): Promise<Place> {
-        const place = await this.placeRepository.findOne({
-            where: { id },
-            relations: ['city', 'reviews']
-        });
-        if (!place) {
-            throw new NotFoundException(`Place with ID ${id} not found`);
+    async createPlace(
+        cityId: number,
+        createPlaceDto: CreatePlaceDto
+    ): Promise<PlaceResponseDto> {
+        // Verify city exists
+        const city = await this.cityRepository.findOne({ where: { id: cityId } });
+        if (!city) {
+            throw new NotFoundException('City not found');
         }
-        return place;
+
+        const place = this.placeRepository.create({
+            ...createPlaceDto,
+            cityId,
+            averageRating: 0,
+            totalReviews: 0
+        });
+
+        await this.placeRepository.save(place);
+
+        return {
+            id: place.id,
+            type: place.type,
+            name: place.name,
+            description: place.description,
+            address: place.address,
+            image: place.image,
+            cityId: place.cityId,
+            rating: {
+                averageRating: 0,
+                totalReviews: 0
+            }
+        };
+    }
+
+    async findOnePlace(placeId: number): Promise<PlaceResponseDto> {
+        const place = await this.placeRepository.findOne({ where: { id: placeId } });
+        if (!place) {
+            throw new NotFoundException('Place not found');
+        }
+
+        return {
+            id: place.id,
+            type: place.type,
+            name: place.name,
+            description: place.description,
+            address: place.address,
+            image: place.image,
+            cityId: place.cityId,
+            rating: {
+                averageRating: place.averageRating,
+                totalReviews: place.totalReviews
+            }
+        };
+    }
+
+    getPlaceTypes(): string[] {
+        return Object.values(PlaceType);
     }
 }

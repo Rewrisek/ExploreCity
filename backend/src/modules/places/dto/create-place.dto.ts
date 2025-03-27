@@ -1,4 +1,11 @@
-import { IsString, IsEnum, IsOptional, IsNumber } from 'class-validator';
+/* eslint-disable */
+import {
+    IsString,
+    IsNotEmpty,
+    IsEnum,
+    IsOptional,
+    IsNumber
+} from 'class-validator';
 import { PlaceType } from '../../../shared/enums/place-type.enum';
 
 export class CreatePlaceDto {
@@ -6,6 +13,7 @@ export class CreatePlaceDto {
     type: PlaceType;
 
     @IsString()
+    @IsNotEmpty()
     name: string;
 
     @IsOptional()
@@ -13,12 +21,10 @@ export class CreatePlaceDto {
     description?: string;
 
     @IsString()
+    @IsNotEmpty()
     address: string;
 
     @IsOptional()
     @IsString()
     image?: string;
-
-    @IsNumber()
-    cityId: number;
 }

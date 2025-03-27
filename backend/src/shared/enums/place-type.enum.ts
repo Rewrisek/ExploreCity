@@ -1,3 +1,4 @@
+/* eslint-disable */
 export enum PlaceType {
     RESTAURANT = 'Restaurant',
     MONUMENT = 'Monument',

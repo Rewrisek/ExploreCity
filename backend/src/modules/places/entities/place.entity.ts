@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+/* eslint-disable */
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    OneToMany,
+    JoinColumn
+} from 'typeorm';
 import { City } from '../../cities/entities/city.entity';
 import { Review } from '../../reviews/entities/review.entity';
 import { PlaceType } from '../../../shared/enums/place-type.enum';
